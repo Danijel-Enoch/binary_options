@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount};
 
-declare_id!("68VQnp2MXC1G6ei7kn1RAveW8rx357T4tRnhC4s4xQoj");
+declare_id!("5k6s5WeXsT1HFpKRGbwnFa2rSttUBYWzVHupJrrLgSj");
 
 #[program]
 pub mod bin_ops {

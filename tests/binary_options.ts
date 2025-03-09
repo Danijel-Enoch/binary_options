@@ -100,9 +100,20 @@ describe("binary_options", async () => {
 		);
 
 		assert.equal(usdcBalance.value.uiAmountString, "200");
-		const tokenMint = new anchor.web3.PublicKey("token_mint_public_key");
+		const tokenMint = new anchor.web3.PublicKey(mint.toString());
 		const feePercentage = 5; // Example fee percentage
-		const tokenVault = new anchor.web3.PublicKey("token_vault_public_key");
+		const contractTokenAccount = await getOrCreateAssociatedTokenAccount(
+			program.provider.connection,
+			depositAccount,
+			tokenMint,
+			depositAccount.publicKey,
+			true,
+			"confirmed",
+			{ commitment: "confirmed" },
+			TOKEN_2022_PROGRAM_ID,
+			ASSOCIATED_PROGRAM_ID
+		);
+		const tokenVault = contractTokenAccount.address;
 		const tx = await program.methods
 			.init(tokenMint, feePercentage, tokenVault)
 			.rpc();

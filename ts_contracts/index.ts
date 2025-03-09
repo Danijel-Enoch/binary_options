@@ -1,0 +1,45 @@
+import {
+	Account,
+	Pubkey,
+	Result,
+	i64,
+	u8,
+	Signer
+} from "@solanaturbine/poseidon";
+
+// creating a class VoteProgram is similar to creating a creating a mod in anchor with all the instructions inside
+export default class BinaryOptions {
+	// define the progam id as a static constant like bellow
+	static PROGRAM_ID = new Pubkey(
+		"HC2oqz2p6DEWfrahenqdq2moUcga9c9biqRBcdK3XKU1"
+	);
+
+	// we can pass in standard Accounts(Signer, TokenAccount, Mint, UncheckedAccount and so on), Custom Accounts(state in this case) and IX arguements(hash in this case) as parameters.
+	initialize(state: VoteState, user: Signer): Result {
+		// PDAs can be derived like <custom_Acc>.derive([...])
+		// where inside array we can pass string, Uint8Array, pubkey
+		// we can also derive PDAs which are token account, associated token account which will be covered in vault and escrow
+		state.derive(["vote"]).init(user); // we can initialise PDA just by chaining a init method to the derive method
+
+		// defining properties(vote) of custom_Acc(state)
+		state.vote = new i64(0);
+	}
+	claim_rewards(): Result {}
+	settle_prediction(): Result {
+		// only admin can settle prediction
+	}
+	create_prediction(): Result {
+		// create prediction by sending funds into smart contract
+	}
+	withdraw_fees(): Result {
+		// withdraw fees from smart contract
+		// only admin can withdraw fees
+	}
+}
+
+// define custom accounts by creating an interface which extends class Account
+export interface VoteState extends Account {
+	// a variety of types are available like u8-u128, i8-i128, usize, boolean, string, Pubkey, etc...
+	vote: i64;
+	bump: u8;
+}

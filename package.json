@@ -3,7 +3,7 @@
 	"scripts": {
 		"lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
 		"lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-		"compile:ts_contract": "poseidon compile --input \"./ts_contracts/index.ts\" --output \"programs/binary_options/src/lib.rs\""
+		"compile:ts_contract": "poseidon compile --input \"./ts_contracts/index.ts\" --output \"./dist/output.rs\""
 	},
 	"dependencies": {
 		"@coral-xyz/anchor": "^0.30.1",

@@ -100,12 +100,12 @@ export default class BinaryOptions {
 		user: Signer,
 		xyz_mint: Mint,
 		is_winning: Boolean,
-		id: u64,
+		//id: u64,
 		taker: Pubkey
 	): Result {
 		auth.derive(["auth"]);
 		state.derive(["binary_options", auth.key]);
-		prediction_state.derive(["prediction", id]);
+		prediction_state.derive(["prediction"]);
 
 		prediction_state.is_settled = true;
 		//prediction_state.is_winning = is_winning;

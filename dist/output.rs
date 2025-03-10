@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     token::{
-        transfer as transfer_spl, Transfer as TransferSPL, Mint, TokenAccount, Token,
+        TokenAccount, Token, Transfer as TransferSPL, transfer as transfer_spl, Mint,
     },
     associated_token::AssociatedToken,
 };
@@ -22,8 +22,8 @@ pub mod binary_options {
         ctx: Context<CreatePredictionContext>,
         amount: u64,
         token_mint: Pubkey,
-        start_timestamp: i64,
-        expiry_timestamp: i64,
+        start_timestamp: u64,
+        expiry_timestamp: u64,
         start_price: u64,
         end_price: u64,
         prediction_type: String,
@@ -51,7 +51,6 @@ pub mod binary_options {
     pub fn settle_prediction(
         ctx: Context<SettlePredictionContext>,
         is_winning: bool,
-        id: u64,
         taker: Pubkey,
     ) -> Result<()> {
         Ok(())
@@ -73,6 +72,8 @@ pub struct InitializeContext<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(mut)]
     pub user: Signer<'info>,
+    #[account(mut)]
+    pub xyz_mint: Account<'info, Mint>,
     #[account(
         mut,
         seeds = [b"vault",
@@ -82,8 +83,6 @@ pub struct InitializeContext<'info> {
         bump,
     )]
     pub xyz_vault: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub xyz_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
@@ -91,14 +90,8 @@ pub struct InitializeContext<'info> {
 pub struct CreatePredictionContext<'info> {
     #[account(init, payer = user, space = 156, seeds = [b"prediction"], bump)]
     pub prediction_state: Account<'info, PredictionState>,
-    #[account(seeds = [b"binary_options", auth.key().as_ref()], bump)]
-    pub state: Account<'info, BinaryOptionsState>,
-    #[account(
-        mut,
-        associated_token::mint = xyz_mint,
-        associated_token::authority = user,
-    )]
-    pub maker_ata: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub user: Signer<'info>,
     #[account(
         mut,
         seeds = [b"vault",
@@ -108,19 +101,31 @@ pub struct CreatePredictionContext<'info> {
         bump,
     )]
     pub xyz_vault: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        associated_token::mint = xyz_mint,
+        associated_token::authority = user,
+    )]
+    pub maker_ata: Account<'info, TokenAccount>,
     #[account(seeds = [b"auth"], bump)]
     /// CHECK: This acc is safe
     pub auth: UncheckedAccount<'info>,
+    #[account(seeds = [b"binary_options", auth.key().as_ref()], bump)]
+    pub state: Account<'info, BinaryOptionsState>,
     #[account(mut)]
     pub xyz_mint: Account<'info, Mint>,
-    #[account(mut)]
-    pub user: Signer<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 #[derive(Accounts)]
 pub struct SettlePredictionContext<'info> {
+    #[account(seeds = [b"binary_options", auth.key().as_ref()], bump)]
+    pub state: Account<'info, BinaryOptionsState>,
+    #[account(mut, seeds = [b"prediction"], bump)]
+    pub prediction_state: Account<'info, PredictionState>,
+    #[account(mut)]
+    pub xyz_mint: Account<'info, Mint>,
     #[account(seeds = [b"auth"], bump)]
     /// CHECK: This acc is safe
     pub auth: UncheckedAccount<'info>,
@@ -137,12 +142,6 @@ pub struct SettlePredictionContext<'info> {
     pub taker_receive_ata: Account<'info, TokenAccount>,
     #[account(mut)]
     pub user: Signer<'info>,
-    #[account(mut, seeds = [b"prediction"], bump)]
-    pub prediction_state: Account<'info, PredictionState>,
-    #[account(mut)]
-    pub xyz_mint: Account<'info, Mint>,
-    #[account(seeds = [b"binary_options", auth.key().as_ref()], bump)]
-    pub state: Account<'info, BinaryOptionsState>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
